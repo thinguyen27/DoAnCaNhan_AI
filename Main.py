@@ -63,34 +63,41 @@ def solve_puzzle():
     start_time = time.time()
     
     # Chạy thuật toán đã chọn
+    #Uninformed Search
     if algorithm == "BFS":
         solution_path = bfs_solve(INITIAL_STATE)
     elif algorithm == "DFS":
         solution_path = dfs_solve(INITIAL_STATE)
+    elif algorithm == "UCS":
+        solution_path = ucs_solve(INITIAL_STATE)
+    elif algorithm == "IDS":
+        solution_path = ids_solve(INITIAL_STATE)
+    #Informed Search
     elif algorithm == "Greedy":
         solution_path = greedy_search_solve(INITIAL_STATE)
     elif algorithm == "A*":
         solution_path = a_star_solve(INITIAL_STATE)
-    elif algorithm == "IDS":
-        solution_path = ids_solve(INITIAL_STATE)
-    elif algorithm == "UCS":
-        solution_path = ucs_solve(INITIAL_STATE)
-    elif algorithm == "Beam Search":
-        solution_path = beam_search(INITIAL_STATE)
-    elif algorithm == "Genetic Algorithm":
-        solution_path = genetic_algorithm_solve(INITIAL_STATE)
+    elif algorithm == "IDA*":
+        solution_path = ida_star_solve(INITIAL_STATE)
+    #Local Search
     elif algorithm == "Simulated Annealing":
         solution_path = simulated_annealing(INITIAL_STATE)
+    elif algorithm == "Beam Search":
+        solution_path = beam_search(INITIAL_STATE)
     elif algorithm == "Stochastic Hill Climbing":
         solution_path = stochastic_hill_climbing(INITIAL_STATE)
     elif algorithm == "Steepest Ascent Hill Climbing":
-        solution_path = steepest_ascent_hill_climbing(INITIAL_STATE)
+        solution_path = steepest_ascent_hill_climbing(INITIAL_STATE)   
     elif algorithm == "Simple Hill Climbing":
-        solution_path = simple_hill_climbing(INITIAL_STATE)
+        solution_path = simple_hill_climbing(INITIAL_STATE) 
+    elif algorithm == "Genetic Algorithm":
+        solution_path = genetic_algorithm_solve(INITIAL_STATE)
+    #Complex Environment
     elif algorithm == "And-Or Graph Search":
         solution_path = and_or_search_solve(INITIAL_STATE)
     elif algorithm == "Belief-Based Search":
         solution_path = belief_based_search_solve(INITIAL_STATE)
+    #CSPS
     elif algorithm == "Backtracking with CSP":
         # Implement CSP solving logic if required
         solution_path = []  # Replace with actual logic if needed
@@ -120,11 +127,11 @@ def update_puzzle_state():
 
 # Thêm ComboBox để chọn thuật toán
 algorithm_combobox = ttk.Combobox(frame_main, values=[
-    "BFS", "DFS", "Greedy", "A*", "IDS", "UCS", 
-    "Beam Search", "Genetic Algorithm", "Simulated Annealing", 
+    "BFS", "DFS", "UCS", "IDS", "Greedy", "A*", 
+    "IDA*", "Simulated Annealing", "Beam Search", 
     "Stochastic Hill Climbing", "Steepest Ascent Hill Climbing", 
-    "Simple Hill Climbing", "And-Or Graph Search", "Belief-Based Search", 
-    "Backtracking with CSP"
+    "Simple Hill Climbing", "Genetic Algorithm", "And-Or Graph Search", 
+    "Belief-Based Search", "Backtracking with CSP"
 ], width=20)
 algorithm_combobox.set("BFS")  # Thuật toán mặc định
 algorithm_combobox.pack(side=tk.TOP, padx=10, pady=10)

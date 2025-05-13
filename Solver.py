@@ -7,7 +7,10 @@ GOAL_STATE = ("1", "2", "3", "4", "5", "6", "7", "8", "")
 
 # ======= Các hàm hỗ trợ =======
 def get_blank_index(state):
+    if "" not in state:
+        raise ValueError("State does not contain a blank tile.")
     return state.index("")
+
 
 def get_neighbors(index):
     moves = {
@@ -243,15 +246,28 @@ def genetic_algorithm_solve(initial_state, population_size=100, generations=500,
         return -manhattan_distance(state)
 
     def mutate(state):
+        # Kiểm tra xem trạng thái có chứa ô trống hay không
+        if "" not in state:
+            raise ValueError("State does not contain a blank tile.")
+        
         blank_index = get_blank_index(state)
         neighbors = [swap_positions(state, blank_index, move) for move in get_neighbors(blank_index)]
         return random.choice(neighbors)
 
     def crossover(p1, p2):
         child = []
+        
+        # Tạo con cái bằng cách chọn ngẫu nhiên các phần tử từ hai cha
         for i in range(9):
             child.append(p1[i] if random.random() < 0.5 else p2[i])
+        
+        # Kiểm tra nếu con cái không có ô trống, thử lại quá trình lai ghép
+        if "" not in child:
+            return crossover(p1, p2)  # Gọi lại hàm lai ghép nếu không có ô trống
+        
         return tuple(child)
+
+
 
     population = [tuple(random.sample(initial_state, 9)) for _ in range(population_size)]
     for _ in range(generations):
