@@ -103,10 +103,12 @@ def solve_puzzle():
     # Bắt đầu cập nhật trạng thái theo chu kỳ
     current_step = 0
     update_puzzle_state()
-
     end_time = time.time()
     runtime = end_time - start_time
-    messagebox.showinfo("Hoàn tất", f"Thuật toán {algorithm} hoàn thành!\nThời gian: {runtime:.4f} giây")
+    if(solution_path[len(solution_path)-1]==GOAL_STATE):
+        messagebox.showinfo("Hoàn tất", f"Thuật toán {algorithm} hoàn thành!\nThời gian: {runtime:.4f} giây")
+    else:
+        messagebox.showinfo("No solution",f"Không tìm ra bài giải")
 
 # Cập nhật trạng thái bảng theo chu kỳ
 def update_puzzle_state():
