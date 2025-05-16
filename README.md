@@ -1,5 +1,6 @@
 # 8-Puzzle Solver
-
+Họ và tên: Nguyễn Trần Quốc Thi
+MSSV: 23110331
 ## Giới thiệu trò chơi 8-Puzzle
 
 8-Puzzle là trò chơi giải đố trên bảng 3x3 gồm 8 ô số và 1 ô trống, nhiệm vụ là di chuyển các ô để đạt được trạng thái đích đã định (thường là sắp xếp theo thứ tự từ 1 đến 8, ô trống ở cuối). Bài toán này là ví dụ điển hình của bài toán tìm kiếm trạng thái trong Trí tuệ nhân tạo (AI).
@@ -225,7 +226,4 @@ Nhóm thuật toán CSP (Constraint Satisfaction Problems) là tập các thuậ
 - **Thuật toán môi trường phức tạp** cho bài toán có thông tin không đầy đủ hoặc đa khả năng, tuy nhiên khó triển khai và tốn tài nguyên.  
 - **Thuật toán CSP** giải các bài toán có ràng buộc tốt, với các kỹ thuật tối ưu giúp giảm thời gian tìm kiếm đáng kể.
 
----
-
-*README này cung cấp cái nhìn toàn diện, giúp người dùng chọn thuật toán phù hợp dựa trên đặc điểm bài toán và yêu cầu về hiệu quả.*
 
