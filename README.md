@@ -1,6 +1,5 @@
 # 8-Puzzle Solver
-#Họ và tên: Nguyễn Trần Quốc Thi
-#MSSV: 23110331
+Họ và tên: Nguyễn Trần Quốc Thi                               MSSV: 23110331
 ## Giới thiệu trò chơi 8-Puzzle
 
 8-Puzzle là trò chơi giải đố trên bảng 3x3 gồm 8 ô số và 1 ô trống, nhiệm vụ là di chuyển các ô để đạt được trạng thái đích đã định (thường là sắp xếp theo thứ tự từ 1 đến 8, ô trống ở cuối). Bài toán này là ví dụ điển hình của bài toán tìm kiếm trạng thái trong Trí tuệ nhân tạo (AI).
