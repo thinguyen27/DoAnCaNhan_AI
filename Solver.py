@@ -241,48 +241,85 @@ def beam_search(initial_state, beam_width=3):
         queue = next_queue
     return None
 
-def genetic_algorithm_solve(initial_state, population_size=100, generations=500, mutation_rate=0.1):
-    def fitness(state):
-        return -manhattan_distance(state)
+def genetic_algorithm(initial_state, goal_state = GOAL_STATE):
+    def flatten(state):
+        return [num for row in state for num in row]
 
-    def mutate(state):
-        # Kiểm tra xem trạng thái có chứa ô trống hay không
-        if "" not in state:
-            raise ValueError("State does not contain a blank tile.")
-        
-        blank_index = get_blank_index(state)
-        neighbors = [swap_positions(state, blank_index, move) for move in get_neighbors(blank_index)]
-        return random.choice(neighbors)
+    def hamming_distance(state):
+        flat_s = flatten(state)
+        flat_g = flatten(goal_state)
+        return sum(1 for a, b in zip(flat_s, flat_g) if a != b and a != 0)
+
+    def generate_candidate():
+        path = [initial_state]
+        current = initial_state
+        visited = {current}
+
+        for _ in range(30):
+            blank_index = get_blank_index(current)
+            neighbors = []
+            for move in get_neighbors(blank_index):
+                new_state = swap_positions(current, blank_index, move)
+                if new_state not in visited:
+                    neighbors.append(new_state)
+
+            if not neighbors:
+                break
+
+            current = random.choice(neighbors)
+            visited.add(current)
+            path.append(current)
+
+        return path
+
+
+    def evaluate(candidate):
+        return -hamming_distance(candidate[-1])
 
     def crossover(p1, p2):
-        child = []
-        
-        # Tạo con cái bằng cách chọn ngẫu nhiên các phần tử từ hai cha
-        for i in range(9):
-            child.append(p1[i] if random.random() < 0.5 else p2[i])
-        
-        # Kiểm tra nếu con cái không có ô trống, thử lại quá trình lai ghép
-        if "" not in child:
-            return crossover(p1, p2)  # Gọi lại hàm lai ghép nếu không có ô trống
-        
-        return tuple(child)
+        if len(p1) < 3 or len(p2) < 3:
+            return p1[:]  # hoặc return p2[:], hoặc chọn random giữa 2
+
+        split = random.randint(1, min(len(p1), len(p2)) - 2)
+        return p1[:split] + p2[split:]
+
+
+    def mutate(candidate):
+        idx = random.randint(1, len(candidate) - 1)
+        base = candidate[idx - 1]
+        visited = set(candidate[:idx])
+
+        blank_index = get_blank_index(base)  # Lấy vị trí ô trống
+        neighbors = []
+        for move in get_neighbors(blank_index):
+            new_state = swap_positions(base, blank_index, move)
+            if new_state not in visited:
+                neighbors.append(new_state)
+
+        if not neighbors:
+            return candidate
+        new_state = random.choice(neighbors)
+        return candidate[:idx] + [new_state]
 
 
 
-    population = [tuple(random.sample(initial_state, 9)) for _ in range(population_size)]
-    for _ in range(generations):
-        population.sort(key=fitness, reverse=True)
-        if population[0] == GOAL_STATE:
-            return [GOAL_STATE]
-        next_generation = population[:10]
-        while len(next_generation) < population_size:
-            p1, p2 = random.choices(population[:50], k=2)
+    population = [generate_candidate() for _ in range(30)]
+
+    for _ in range(200):
+        population.sort(key=evaluate, reverse=True)
+        next_gen = population[:2]
+        while len(next_gen) < 30:
+            p1, p2 = random.sample(population[:5], 2)
             child = crossover(p1, p2)
-            if random.random() < mutation_rate:
+            if random.random() < 0.2:
                 child = mutate(child)
-            next_generation.append(child)
-        population = next_generation
-    return [population[0]]
+            next_gen.append(child)
+        population = next_gen
+
+    best = max(population, key=evaluate)
+    if best[-1] == goal_state:
+        return best
+    return None
 
 def and_or_search_solve(initial_state, max_depth=50):
     stack = [(initial_state, [initial_state], 0)]
@@ -342,9 +379,10 @@ def graph_coloring_solver(graph, colors):
 
 
 def backtracking_search_csp(variables, domains, constraints):
-    steps = []
+    steps = []  # Lưu lại các bước trong quá trình backtracking
 
     def is_consistent(var, value, assignment):
+        # Kiểm tra tính nhất quán của giá trị
         for (v1, v2) in constraints:
             if v1 == var and v2 in assignment and assignment[v2] == value:
                 return False
@@ -353,21 +391,35 @@ def backtracking_search_csp(variables, domains, constraints):
         return True
 
     def backtrack(assignment):
+        # Nếu tất cả các biến đã được gán giá trị, trả về kết quả
         if len(assignment) == len(variables):
+            # Construct state as a tuple of length 9
+            state = [''] * 9  # Tạo một danh sách có 9 ô trống
+            for var in variables:
+                index = ord(var) - ord('X')  # Dùng chỉ số của biến (X, Y, Z, ...)
+                state[index] = assignment.get(var, '')  # Gán giá trị cho ô tương ứng
+            steps.append(tuple(state))  # Lưu trạng thái dưới dạng tuple
             return assignment
+
+        # Lựa chọn biến chưa được gán giá trị (biến đầu tiên trong danh sách variables)
         var = next(v for v in variables if v not in assignment)
+
+        # Thử tất cả các giá trị có thể cho biến này
         for value in domains[var]:
             if is_consistent(var, value, assignment):
-                new_assignment = assignment.copy()
-                new_assignment[var] = value
-                steps.append(new_assignment)  # lưu lại mỗi lần gán biến
-                result = backtrack(new_assignment)
+                new_assignment = assignment.copy()  # Sao chép assignment hiện tại
+                new_assignment[var] = value  # Gán giá trị cho biến
+
+                result = backtrack(new_assignment)  # Tái gọi backtrack cho assignment mới
                 if result:
-                    return result
+                    return result  # Nếu tìm thấy kết quả, trả về
+
+        # Nếu không tìm được kết quả hợp lệ, quay lại (backtrack)
         return None
 
-    result = backtrack({})
-    return steps if result else None
+    result = backtrack({})  # Bắt đầu với assignment rỗng
+    return steps if result else None  # Trả về các bước nếu có kết quả, nếu không trả về None
+
 
 
 def ac3(csp):
@@ -389,3 +441,53 @@ def revise(csp, xi, xj):
             csp['domains'][xi].remove(x)
             revised = True
     return revised
+
+
+# Backtracking với Forward Checking
+def forward_checking(variables, domains, constraints):
+    """
+    Hàm Forward Checking kiểm tra tính nhất quán của các giá trị trong miền của các biến còn lại.
+    """
+    for var in variables:
+        if len(domains[var]) == 0:  # Nếu không còn giá trị hợp lệ trong miền của biến
+            return False
+        for value in domains[var]:
+            # Kiểm tra các biến hàng xóm trong danh sách ràng buộc
+            for (v1, v2) in constraints:
+                if v1 == var:
+                    # Loại bỏ giá trị xung đột trong miền của biến v2
+                    if value in domains[v2]:
+                        domains[v2].remove(value)
+                elif v2 == var:
+                    # Loại bỏ giá trị xung đột trong miền của biến v1
+                    if value in domains[v1]:
+                        domains[v1].remove(value)
+    return True
+
+def backtracking_with_forward_checking(variables, domains, constraints, assignment={}):
+    """
+    Thuật toán Backtracking với Forward Checking để giải quyết CSP.
+    """
+    if len(assignment) == len(variables):  # Nếu tất cả các biến đã được gán giá trị
+        return assignment
+
+    # Chọn biến chưa gán giá trị (ở đây tôi sẽ chọn biến đầu tiên chưa được gán)
+    var = next(v for v in variables if v not in assignment)
+
+    # Thử tất cả các giá trị có thể cho biến này
+    for value in domains[var]:
+        # Gán giá trị cho biến
+        assignment[var] = value
+
+        # Forward checking
+        new_domains = {k: set(v) for k, v in domains.items()}  # Sao chép các miền
+        if forward_checking(variables, new_domains, constraints):
+            # Nếu forward checking thành công, tiếp tục với các biến còn lại
+            result = backtracking_with_forward_checking(variables, new_domains, constraints, assignment)
+            if result:
+                return result  # Nếu tìm thấy giải pháp, trả về
+
+        # Nếu không tìm thấy giải pháp, quay lại và thử giá trị khác
+        del assignment[var]
+
+    return None  # Nếu không tìm thấy giải pháp nào

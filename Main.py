@@ -11,7 +11,7 @@ root.title("Giải đố 8-Puzzle + Thuật toán CSP")
 root.geometry("800x600")
 
 # Khởi tạo trạng thái ban đầu
-INITIAL_STATE = ("2", "6", "5", "", "8", "7", "4", "3", "1")
+INITIAL_STATE = ("1", "2", "3", "4", "5", "6", "", "7", "8")
 GOAL_STATE = ("1", "2", "3", "4", "5", "6", "7", "8", "")
 
 # Tạo frame chính
@@ -63,7 +63,6 @@ def solve_puzzle():
     start_time = time.time()
     
     # Chạy thuật toán đã chọn
-    #Uninformed Search
     if algorithm == "BFS":
         solution_path = bfs_solve(INITIAL_STATE)
     elif algorithm == "DFS":
@@ -72,14 +71,12 @@ def solve_puzzle():
         solution_path = ucs_solve(INITIAL_STATE)
     elif algorithm == "IDS":
         solution_path = ids_solve(INITIAL_STATE)
-    #Informed Search
     elif algorithm == "Greedy":
         solution_path = greedy_search_solve(INITIAL_STATE)
     elif algorithm == "A*":
         solution_path = a_star_solve(INITIAL_STATE)
     elif algorithm == "IDA*":
         solution_path = ida_star_solve(INITIAL_STATE)
-    #Local Search
     elif algorithm == "Simulated Annealing":
         solution_path = simulated_annealing(INITIAL_STATE)
     elif algorithm == "Beam Search":
@@ -91,39 +88,70 @@ def solve_puzzle():
     elif algorithm == "Simple Hill Climbing":
         solution_path = simple_hill_climbing(INITIAL_STATE) 
     elif algorithm == "Genetic Algorithm":
-        solution_path = genetic_algorithm_solve(INITIAL_STATE)
-    #Complex Environment
+        solution_path = genetic_algorithm(INITIAL_STATE)
     elif algorithm == "And-Or Graph Search":
         solution_path = and_or_search_solve(INITIAL_STATE)
     elif algorithm == "Belief-Based Search":
         solution_path = belief_based_search_solve(INITIAL_STATE)
-    #CSPS
+    elif algorithm == "Backtracking":
+        variables = ['X', 'Y', 'Z']
+        domains = {
+            'X': {1, 2, 3},
+            'Y': {1, 2, 3},
+            'Z': {1, 2, 3}
+        }
+        constraints = [
+            ('X', 'Y'),
+            ('X', 'Z'),
+            ('Y', 'Z')
+        ]
+        solution_path = backtracking_search_csp(variables, domains, constraints)
     elif algorithm == "Backtracking with CSP":
-        # Implement CSP solving logic if required
-        solution_path = []  # Replace with actual logic if needed
+        variables = ['X', 'Y', 'Z']
+        domains = {
+            'X': {1, 2, 3},
+            'Y': {1, 2, 3},
+            'Z': {1, 2, 3}
+        }
+        constraints = [
+            ('X', 'Y'),
+            ('X', 'Z'),
+            ('Y', 'Z')
+        ]
+        solution_path = backtracking_with_forward_checking(variables, domains, constraints)
     else:
         solution_path = []
     
-    # Cập nhật các bước giải
-    update_steps(solution_path)
-    
-    # Bắt đầu cập nhật trạng thái theo chu kỳ
-    current_step = 0
-    update_puzzle_state()
+    # Kiểm tra solution_path có dữ liệu không
+    if solution_path is not None and solution_path:
+        # Cập nhật các bước giải
+        update_steps(solution_path)
+        current_step = 0
+        update_puzzle_state()
+    else:
+        messagebox.showinfo("No solution", "Không tìm ra bài giải")
+
     end_time = time.time()
     runtime = end_time - start_time
-    if(solution_path[len(solution_path)-1]==GOAL_STATE):
-        messagebox.showinfo("Hoàn tất", f"Thuật toán {algorithm} hoàn thành!\nThời gian: {runtime:.4f} giây")
-    else:
-        messagebox.showinfo("No solution",f"Không tìm ra bài giải")
+    messagebox.showinfo("Hoàn tất", f"Thuật toán {algorithm} hoàn thành!\nThời gian: {runtime:.4f} giây")
 
 # Cập nhật trạng thái bảng theo chu kỳ
 def update_puzzle_state():
     global current_step
-    if current_step < len(solution_path):
-        draw_puzzle(solution_path[current_step])  # Vẽ trạng thái hiện tại
-        current_step += 1
-        root.after(200, update_puzzle_state)  # Lên lịch cập nhật sau 0.2 giây
+    if solution_path:  # Kiểm tra nếu solution_path có dữ liệu
+        if current_step < len(solution_path):
+            state = solution_path[current_step]
+            if isinstance(state, tuple) and len(state) == 9:  # Kiểm tra đúng định dạng tuple dài 9
+                draw_puzzle(state)
+                current_step += 1
+                root.after(200, update_puzzle_state)  # Lên lịch cập nhật sau 0.2 giây
+            else:
+                messagebox.showinfo("Invalid state", "State format is incorrect.")
+        else:
+            messagebox.showinfo("No more steps", "No more states to display.")
+    else:
+        messagebox.showinfo("No solution", "No solution found.")
+
 
 # Thêm ComboBox để chọn thuật toán
 algorithm_combobox = ttk.Combobox(frame_main, values=[
@@ -131,7 +159,7 @@ algorithm_combobox = ttk.Combobox(frame_main, values=[
     "IDA*", "Simulated Annealing", "Beam Search", 
     "Stochastic Hill Climbing", "Steepest Ascent Hill Climbing", 
     "Simple Hill Climbing", "Genetic Algorithm", "And-Or Graph Search", 
-    "Belief-Based Search", "Backtracking with CSP"
+    "Belief-Based Search", "Backtracking", "Backtracking with CSP"
 ], width=20)
 algorithm_combobox.set("BFS")  # Thuật toán mặc định
 algorithm_combobox.pack(side=tk.TOP, padx=10, pady=10)
