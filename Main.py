@@ -11,7 +11,7 @@ root.title("Giải đố 8-Puzzle + Thuật toán CSP")
 root.geometry("800x600")
 
 # Khởi tạo trạng thái ban đầu
-INITIAL_STATE = ("1", "2", "3", "4", "5", "6", "", "7", "8")
+INITIAL_STATE = ("2", "6", "5", "", "8", "7", "4", "3", "1")
 GOAL_STATE = ("1", "2", "3", "4", "5", "6", "7", "8", "")
 
 # Tạo frame chính
